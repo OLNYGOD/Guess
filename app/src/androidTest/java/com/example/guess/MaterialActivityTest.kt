@@ -2,6 +2,7 @@ package com.example.guess
 
 import android.content.res.Resources
 import android.util.Log
+import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -24,22 +25,30 @@ class MaterialActivityTest{
     fun guessWorng(){
         val scenario  = rule.scenario
         var secret = 0
-        scenario.onActivity { secret = it.secretNumber.secret
+        scenario.onActivity { secret = it.secretNumber.secret  //從secretNumber取得seret
         resources = it.resources}
         Log.d(MaterialActivityTest::class.java.simpleName, "secret : " +secret)
-        val n = 5
-        //Espresso test UI for single app
-        onView(withId(R.id.ed_number))
-            .perform(clearText())                //清除資料
-        onView(withId(R.id.ed_number))            //取得id資料
-            .perform(typeText(n.toString()))     //viewaction 執行輸入5這個動作
-        onView(withId(R.id.button_ok))
-            .perform(click())                    //按下按鈕
-        var message =
-            if (n < secret) resources.getString(R.string.bigger)
-            else resources.getString(R.string.smaller)
-        Log.d(MaterialActivityTest::class.java.simpleName, "message : " +message  )
-        onView(withText(message)).check(matches(isDisplayed()))  //檢查訊息有無跳出
+        for( n in 1..10){
+            if (n != secret){
+                //Espresso test UI for single app
+                onView(withId(R.id.ed_number))
+                    .perform(clearText())                //清除資料
+                onView(withId(R.id.ed_number))            //取得id資料
+                    .perform(typeText(n.toString()))     //viewaction 執行輸入5這個動作
+                onView(withId(R.id.button_ok))
+                    .perform(click())                    //按下按鈕
+                var message =
+                    if (n > secret) resources.getString(R.string.bigger)
+                    else resources.getString(R.string.smaller)
+                Log.d(MaterialActivityTest::class.java.simpleName, "message : " +message  )
+                onView(withText(message)).check(matches(isDisplayed()))  //檢查訊息有無跳出
+                onView(withText(resources.getString(R.string.ok))).perform(click())
+            }
+        }
+        onView(withId(R.id.ed_number)).perform(closeSoftKeyboard())
+        onView(withId(R.id.fab)).perform(click())
+        onView(withText("Replay game")).check(matches(isDisplayed()))
         onView(withText(resources.getString(R.string.ok))).perform(click())
+        onView(withId(R.id.counter)).check(matches(withText("0")))
     }
 }
